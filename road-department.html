@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Public Works — Road Complaint Desk</title>
+<style>
+  :root{
+    --asphalt:#2b2b2d; --asphalt2:#38383b; --caution:#f4b400; --caution-dim:#c98f00; --line:#4a4a4d; --paper:#f1efe9; --sub:#9b9a95;
+    box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;background:var(--asphalt);color:var(--paper);font-family:'Trebuchet MS',Helvetica,Arial,sans-serif;}
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--asphalt2);padding:16px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:4px solid var(--caution);background-image:repeating-linear-gradient(135deg,var(--caution) 0 18px, var(--asphalt2) 18px 36px);background-size:100% 4px;background-position:bottom;background-repeat:no-repeat;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{width:32px;height:32px;background:var(--caution);color:var(--asphalt);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:1rem;flex-shrink:0;}
+  .brand h1{margin:0;font-size:1.05rem;font-weight:700;}
+  .brand p{margin:0;font-size:.72rem;color:var(--caution);letter-spacing:.3px;}
+  .bell-wrap{position:relative;}
+  .bell{background:rgba(244,180,0,.08);border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:8px 12px;font-size:.85rem;cursor:pointer;position:relative;}
+  .bell .dot{position:absolute;top:-6px;right:-6px;background:#d4453a;color:#fff;font-size:.65rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+  .panel{position:absolute;right:0;top:calc(100% + 8px);width:min(340px,90vw);background:var(--asphalt2);border:1px solid var(--line);border-radius:10px;box-shadow:0 14px 34px rgba(0,0,0,.4);max-height:60vh;overflow-y:auto;display:none;}
+  .panel.open{display:block;}
+  .panel h4{margin:0;padding:12px 14px;font-size:.72rem;letter-spacing:.5px;color:var(--caution);border-bottom:1px solid var(--line);}
+  .panel .item{padding:10px 14px;border-bottom:1px solid var(--line);font-size:.85rem;cursor:pointer;}
+  .panel .item:hover{background:rgba(244,180,0,.06);}
+  .panel .item b{display:block;color:var(--caution);font-size:.72rem;margin-bottom:2px;}
+  .panel .empty{padding:16px 14px;font-size:.8rem;color:var(--sub);}
+  main{max-width:960px;margin:0 auto;padding:26px 20px 60px;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+  .stat{background:var(--asphalt2);border-radius:10px;padding:14px 16px;border:1px solid var(--line);}
+  .stat .n{font-size:1.9rem;font-weight:800;}
+  .stat .l{font-size:.72rem;color:var(--caution);letter-spacing:.3px;}
+  .stat.new .n{color:#d4453a;}
+  form{background:var(--asphalt2);border-radius:12px;padding:20px;margin-bottom:28px;border:1px solid var(--line);}
+  form h2{margin:0 0 4px;font-size:1.1rem;}
+  form p.sub{margin:0 0 16px;font-size:.82rem;color:var(--sub);}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  input,textarea,select{width:100%;border:1px solid var(--line);background:var(--asphalt);color:var(--paper);border-radius:7px;padding:10px 11px;font-size:.9rem;font-family:inherit;}
+  textarea{min-height:70px;resize:vertical;grid-column:1/-1;}
+  button.submit{background:var(--caution);color:var(--asphalt);border:none;border-radius:7px;padding:11px 20px;font-weight:800;cursor:pointer;font-size:.9rem;}
+  button.submit:hover{background:var(--caution-dim);}
+  .list h2{font-size:1.1rem;margin:0 0 14px;}
+  .card{background:var(--asphalt2);border-radius:10px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--line);display:flex;gap:14px;justify-content:space-between;align-items:flex-start;}
+  .card.is-new{border-left:4px solid #d4453a;}
+  .card .meta{font-size:.7rem;color:var(--caution);letter-spacing:.3px;margin-bottom:4px;}
+  .card p{margin:4px 0 6px;font-size:.92rem;line-height:1.45;}
+  .card .who{font-size:.78rem;color:var(--sub);}
+  .badge{font-size:.68rem;padding:3px 10px;border-radius:20px;white-space:nowrap;height:fit-content;}
+  .badge.new{background:rgba(212,69,58,.18);color:#f18075;}
+  .badge.read{background:rgba(244,180,0,.15);color:var(--caution);}
+  .badge.resolved{background:rgba(90,180,110,.15);color:#7fd08a;}
+  .actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+  .actions button{background:none;border:1px solid var(--line);color:var(--paper);font-size:.72rem;padding:5px 9px;border-radius:6px;cursor:pointer;}
+  .actions button:hover{border-color:var(--caution);color:var(--caution);}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--sub);font-size:.9rem;}
+  .ja-tag{display:inline-block;margin-left:6px;font-size:.65rem;padding:2px 7px;border-radius:20px;background:rgba(34,211,168,.15);color:#22d3a8;vertical-align:middle;font-weight:700;letter-spacing:.3px;}
+  ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="mark">🚧</div>
+    <div><h1>Public Works — Roads Division</h1><p>ROAD COMPLAINT DESK</p></div>
+  </div>
+  <div class="bell-wrap">
+    <button class="bell" id="bellBtn">Alerts<span class="dot" id="bellCount" style="display:none">0</span></button>
+    <div class="panel" id="bellPanel"><h4>New complaints</h4><div id="bellList"></div></div>
+  </div>
+</header>
+<main>
+  <div class="stats">
+    <div class="stat new"><div class="n" id="statNew">0</div><div class="l">New</div></div>
+    <div class="stat"><div class="n" id="statRead">0</div><div class="l">Scheduled</div></div>
+    <div class="stat"><div class="n" id="statResolved">0</div><div class="l">Fixed</div></div>
+  </div>
+
+  <form id="complaintForm">
+    <h2>Report a road problem</h2>
+    <p class="sub">Potholes, broken streetlights, damaged signage, or unsafe road conditions.</p>
+    <div class="row">
+      <input type="text" id="cName" placeholder="Your name" required>
+      <input type="text" id="cContact" placeholder="Phone or email" required>
+    </div>
+    <div class="row">
+      <select id="cType">
+        <option>Pothole</option>
+        <option>Broken streetlight</option>
+        <option>Damaged / missing signage</option>
+        <option>Cracked pavement</option>
+        <option>Open manhole / hazard</option>
+        <option>Encroachment / debris on road</option>
+      </select>
+      <input type="text" id="cLocation" placeholder="Road / landmark" required>
+    </div>
+    <textarea id="cDetails" placeholder="Describe the problem..." required></textarea>
+    <button type="submit" class="submit">Submit complaint</button>
+  </form>
+
+  <div class="list">
+    <h2>Reported issues</h2>
+    <div id="complaintList"></div>
+  </div>
+</main>
+<script src="sync.js"></script>
+<script>
+const STORE_KEY='road_dept_complaints_v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||seed(); }catch(e){ return seed(); } }
+function save(list){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(list)); }catch(e){} }
+function seed(){
+  const now=Date.now();
+  const s=[
+    {id:1,name:'V. Kulkarni',contact:'v.k@mail.com',type:'Pothole',location:'Ring Road, near Bus Stop 4',details:'Large pothole causing two-wheeler accidents at night.',time:now-5400e3,status:'new'},
+    {id:2,name:'N. Das',contact:'98xxxx7788',type:'Broken streetlight',location:'Lake View Colony',details:'Streetlight has been off for two weeks, area is very dark.',time:now-259200e3,status:'read'}
+  ];
+  save(s); return s;
+}
+let complaints = load();
+function fmtTime(t){ const d=new Date(t); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function render(){
+  const list = document.getElementById('complaintList');
+  const sorted=[...complaints].sort((a,b)=>b.time-a.time);
+  list.innerHTML = sorted.length? '' : '<div class="empty-state">No reports yet.</div>';
+  sorted.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='card'+(c.status==='new'?' is-new':'');
+    div.innerHTML = `
+      <div style="flex:1">
+        <div class="meta">${c.type} · ${fmtTime(c.time)} · ${escapeHtml(c.location)}${c.janAwaazId?'<span class="ja-tag">via JanAwaaz</span>':''}</div>
+        <p>${escapeHtml(c.details)}</p>
+        <div class="who">Filed by ${escapeHtml(c.name)} (${escapeHtml(c.contact)})</div>
+      </div>
+      <div class="actions">
+        <span class="badge ${c.status}">${c.status==='new'?'New':c.status==='read'?'Scheduled':'Fixed'}</span>
+        ${c.status==='new'?'<button data-act="read" data-id="'+c.id+'">Schedule repair</button>':''}
+        ${c.status!=='resolved'?'<button data-act="resolve" data-id="'+c.id+'">Mark fixed</button>':''}
+      </div>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('button[data-act]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id=Number(btn.dataset.id), act=btn.dataset.act;
+      const c=complaints.find(x=>x.id===id); if(!c) return;
+      c.status = act==='read' ? 'read' : 'resolved';
+      window.JASync && c.janAwaazId && JASync.syncStatus(c.janAwaazId, c.status, JASync.deptNameFor(STORE_KEY));
+      save(complaints); render(); renderBell();
+    });
+  });
+  document.getElementById('statNew').textContent = complaints.filter(c=>c.status==='new').length;
+  document.getElementById('statRead').textContent = complaints.filter(c=>c.status==='read').length;
+  document.getElementById('statResolved').textContent = complaints.filter(c=>c.status==='resolved').length;
+}
+
+function renderBell(){
+  const newOnes = complaints.filter(c=>c.status==='new').sort((a,b)=>b.time-a.time);
+  const dot=document.getElementById('bellCount');
+  if(newOnes.length){ dot.style.display='flex'; dot.textContent=newOnes.length; } else { dot.style.display='none'; }
+  const bl=document.getElementById('bellList');
+  bl.innerHTML = newOnes.length? '' : '<div class="empty">No new reports.</div>';
+  newOnes.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerHTML=`<b>${c.type}</b>${escapeHtml(c.location)} — ${escapeHtml(c.name)}`;
+    d.addEventListener('click', ()=>{ c.status='read'; window.JASync && c.janAwaazId && JASync.syncStatus(c.janAwaazId, c.status, JASync.deptNameFor(STORE_KEY)); save(complaints); render(); renderBell(); });
+    bl.appendChild(d);
+  });
+}
+
+document.getElementById('bellBtn').addEventListener('click', ()=>{
+  document.getElementById('bellPanel').classList.toggle('open');
+});
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.bell-wrap')) document.getElementById('bellPanel').classList.remove('open');
+});
+
+document.getElementById('complaintForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const c = {
+    id: Date.now(),
+    name: document.getElementById('cName').value.trim(),
+    contact: document.getElementById('cContact').value.trim(),
+    type: document.getElementById('cType').value,
+    location: document.getElementById('cLocation').value.trim(),
+    details: document.getElementById('cDetails').value.trim(),
+    time: Date.now(),
+    status: 'new'
+  };
+  complaints.push(c); save(complaints);
+  e.target.reset(); render(); renderBell();
+});
+
+render(); renderBell();
+
+// Live sync: a complaint dispatched from JanAwaaz updates this board in real time.
+window.addEventListener('storage', (e)=>{
+  if(e.key!==STORE_KEY) return;
+  const prevCount = complaints.length;
+  complaints = load();
+  render(); renderBell();
+  if(complaints.length>prevCount && window.JASync){
+    const fresh = complaints.find(c=>c.source==='JanAwaaz' && c.status==='new');
+    if(fresh) JASync.notify('New complaint from JanAwaaz', fresh.type + ' — ' + fresh.location);
+  }
+});
+</script>
+</body>
+</html>

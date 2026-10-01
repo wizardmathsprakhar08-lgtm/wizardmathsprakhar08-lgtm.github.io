@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JanAwaaz AI — Anonymous Grievance Redressal</title>
+<style>
+:root{
+  --bg:#0a0e17; --bg2:#0d1220; --card:#131a29; --card-border:#232c3f;
+  --teal:#22d3a8; --teal-dim:#16382f; --text:#eef1f6; --sub:#8b94a7;
+  --water:#3b9dd8; --elec:#e8b93b; --fire:#e0604a; --road:#c98a4b; --police:#9a7de0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; height:100%;}
+html,body{height:100%;}
+a{color:inherit;}
+.wrap{max-width:640px; margin:0 auto; padding:0 20px;}
+
+header{position:sticky; top:0; z-index:20; background:rgba(10,14,23,0.92); backdrop-filter:blur(8px); border-bottom:1px solid var(--card-border); padding-top:env(safe-area-inset-top,0px);}
+.headrow{display:flex; align-items:center; gap:10px; padding:14px 20px; max-width:640px; margin:0 auto;}
+.shield{width:38px; height:38px; border-radius:10px; background:linear-gradient(160deg,#1ee0ab,#0f8f6f); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.brand{display:flex; flex-direction:column; line-height:1.15;}
+.brand b{font-size:16px; letter-spacing:.2px;}
+.brand span{font-size:10.5px; color:var(--sub);}
+.navbtns{display:flex; gap:8px; margin-left:auto;}
+.navbtns button{background:none; border:1px solid var(--card-border); color:var(--teal); font-size:12.5px; padding:8px 12px; border-radius:9px; cursor:pointer; font-weight:600; white-space:nowrap;}
+.navbtns button.active{background:var(--teal-dim); border-color:var(--teal);}
+
+main{padding-bottom:60px;}
+.badge{display:inline-flex; align-items:center; gap:7px; background:var(--teal-dim); color:var(--teal); border:1px solid #1d5346; border-radius:999px; padding:7px 16px; font-size:12.5px; font-weight:600; margin:26px auto 18px; }
+.badge-row{text-align:center;}
+h1.hero{font-size:2.3rem; line-height:1.12; text-align:center; margin:0 0 14px; font-weight:800; letter-spacing:-0.5px;}
+p.lede{text-align:center; color:var(--sub); font-size:15px; line-height:1.6; margin:0 0 30px;}
+
+.card{background:var(--card); border:1px solid var(--card-border); border-radius:16px; padding:20px; margin-bottom:18px;}
+.info-card{display:flex; gap:14px;}
+.info-ic{width:44px; height:44px; border-radius:11px; background:var(--teal-dim); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.info-card h3{margin:2px 0 6px; font-size:15px;}
+.info-card p{margin:0; font-size:13.5px; color:var(--sub); line-height:1.55;}
+.info-card b{color:var(--teal); font-weight:600;}
+
+label.field-label{display:block; font-size:14.5px; font-weight:700; margin-bottom:10px;}
+label.field-label .req{color:var(--teal);}
+textarea, select, input[type=text]{width:100%; background:var(--bg2); border:1px solid var(--card-border); color:var(--text); border-radius:12px; padding:14px; font-size:14px; font-family:inherit; resize:vertical;}
+textarea::placeholder{color:#5b6478;}
+textarea:focus, select:focus, input:focus{outline:none; border-color:var(--teal);}
+.grid2{display:grid; grid-template-columns:1fr; gap:14px; margin-top:16px;}
+@media(min-width:520px){.grid2{grid-template-columns:1fr 1fr;}}
+
+.upload-zone{border:1.5px dashed var(--card-border); border-radius:12px; padding:22px; text-align:center; margin-top:16px; cursor:pointer; transition:border-color .15s;}
+.upload-zone:hover{border-color:var(--teal);}
+.upload-zone p{margin:8px 0 0; font-size:13px; color:var(--sub);}
+.thumbs{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;}
+.thumb{position:relative; width:64px; height:64px; border-radius:8px; overflow:hidden; background:var(--bg2); border:1px solid var(--card-border); display:flex; align-items:center; justify-content:center; font-size:10px; color:var(--sub); text-align:center;}
+.thumb img{width:100%; height:100%; object-fit:cover;}
+.thumb .rm{position:absolute; top:2px; right:2px; width:18px; height:18px; background:rgba(0,0,0,.65); border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; line-height:1;}
+
+.submit-btn{width:100%; background:var(--teal); color:#04231b; border:none; border-radius:12px; padding:16px; font-size:15px; font-weight:700; cursor:pointer; margin-top:20px;}
+.submit-btn:disabled{opacity:.5; cursor:not-allowed;}
+.hint{font-size:12px; color:var(--sub); margin-top:8px; text-align:center;}
+
+/* pipeline */
+.pipeline-stage{display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--card-border);}
+.pipeline-stage:last-child{border-bottom:none;}
+.stage-dot{width:26px; height:26px; border-radius:50%; background:var(--bg2); border:2px solid var(--card-border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; margin-top:2px;}
+.stage-dot.done{background:var(--teal); border-color:var(--teal); color:#04231b;}
+.stage-dot.active{border-color:var(--teal); color:var(--teal);}
+.stage-text b{display:block; font-size:14px;}
+.stage-text span{font-size:12.5px; color:var(--sub);}
+
+.result-id{font-family:ui-monospace,Menlo,Consolas,monospace; font-size:22px; font-weight:700; letter-spacing:1px; color:var(--teal); background:var(--teal-dim); border:1px solid #1d5346; border-radius:12px; padding:16px; text-align:center; margin:16px 0;}
+.tag{display:inline-block; padding:4px 11px; border-radius:999px; font-size:12px; font-weight:700;}
+.tag.Water{background:#122f42; color:var(--water);}
+.tag.Electricity{background:#3a2f10; color:var(--elec);}
+.tag.Fire{background:#3a1c15; color:var(--fire);}
+.tag.Road{background:#332417; color:var(--road);}
+.tag.Police-Safety{background:#251a3a; color:var(--police);}
+.tag.General{background:#20242e; color:var(--sub);}
+
+.track-timeline{margin-top:14px;}
+.tl-item{display:flex; gap:12px; padding-bottom:20px; position:relative;}
+.tl-item:not(:last-child)::before{content:""; position:absolute; left:12px; top:26px; bottom:-2px; width:2px; background:var(--card-border);}
+.tl-item.done:not(:last-child)::before{background:var(--teal);}
+.tl-dot{width:25px; height:25px; border-radius:50%; background:var(--bg2); border:2px solid var(--card-border); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; z-index:1;}
+.tl-item.done .tl-dot{background:var(--teal); border-color:var(--teal); color:#04231b;}
+.tl-body b{display:block; font-size:14px;}
+.tl-body span{font-size:12.5px; color:var(--sub);}
+
+.empty{text-align:center; color:var(--sub); font-size:14px; padding:30px 10px;}
+.small-link{background:none; border:none; color:var(--teal); font-size:13.5px; cursor:pointer; text-decoration:underline; padding:0;}
+footer{text-align:center; color:var(--sub); font-size:12px; padding:10px 20px 30px;}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="headrow">
+    <div class="shield">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z" fill="#fff" opacity=".95"/><path d="M9 12l2 2 4-4" stroke="#0f8f6f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="brand"><b>JanAwaaz AI</b><span>Anonymous Grievance Redressal</span></div>
+    <div class="navbtns">
+      <button id="navSubmit" class="active" onclick="showView('submit')">Submit Issue</button>
+      <button id="navTrack" onclick="showView('track')">Track Status</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- SUBMIT VIEW -->
+  <section id="view-submit">
+    <div class="badge-row"><span class="badge">✦ Multi-Agent AI Pipeline Active</span></div>
+    <h1 class="hero">Report Public Issue<br>Anonymously</h1>
+    <p class="lede">Submit grievances without signing in. Our automated AI pipeline scrubs personal info, evaluates urgency, detects duplicates, and routes your issue to the correct authority.</p>
+
+    <div class="card info-card">
+      <div class="info-ic">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22d3a8" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><line x1="2" y1="2" x2="22" y2="22"/></svg>
+      </div>
+      <div>
+        <h3>100% Anonymous &amp; Private</h3>
+        <p>The <b>IntakeAgent</b> scrubs names, phone numbers, and email addresses via regex rules before processing. No IP address or login identity is stored.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <label class="field-label">Grievance Description <span class="req">*</span></label>
+      <textarea id="descInput" rows="5" placeholder="Describe the issue in detail (e.g., Severe water leakage on Main Street near house #42. Water is overflowing into the road causing traffic jams...)"></textarea>
+
+      <div style="margin-top:16px;">
+        <label class="field-label" style="font-size:13px;">Location (optional)</label>
+        <input type="text" id="locInput" placeholder="Area, street, landmark">
+      </div>
+      <p class="hint" style="text-align:left; margin-top:10px;">Category is not chosen by you — the ClassifierAgent reads your description and assigns it automatically.</p>
+
+      <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#8b94a7" stroke-width="1.6" style="margin:0 auto; display:block;"><path d="M12 16V4M12 4l-4 4M12 4l4 4"/><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"/></svg>
+        <p>Attach photos or videos as evidence (optional)</p>
+      </div>
+      <input type="file" id="fileInput" accept="image/*,video/*" multiple class="hidden" onchange="handleFiles(this.files)">
+      <div class="thumbs" id="thumbs"></div>
+
+      <button class="submit-btn" id="submitBtn" onclick="beginPipeline()">Submit Grievance</button>
+      <p class="hint">Once submitted, you'll receive a tracking ID — save it to check status anytime.</p>
+    </div>
+  </section>
+
+  <!-- PIPELINE VIEW -->
+  <section id="view-pipeline" class="hidden">
+    <h1 class="hero" style="font-size:1.6rem;">Processing your grievance</h1>
+    <p class="lede">Please wait while the multi-agent pipeline handles your submission.</p>
+    <div class="card" id="pipelineCard"></div>
+  </section>
+
+  <!-- SUCCESS VIEW -->
+  <section id="view-success" class="hidden">
+    <h1 class="hero" style="font-size:1.6rem;">Grievance Submitted</h1>
+    <p class="lede">Your issue has been anonymized, classified, and routed automatically.</p>
+    <div class="card" style="text-align:center;">
+      <span id="successTag" class="tag"></span>
+      <div class="result-id" id="successId"></div>
+      <p id="successDeptNote" class="hint" style="margin-top:0; color:var(--teal); font-weight:600;"></p>
+      <div id="successStatus" class="status-line" style="font-size:13px; color:var(--sub);"></div>
+      <p class="hint" style="margin-top:0;">Save this ID — it's the only way to track your grievance.</p>
+      <button class="submit-btn" onclick="trackFromSuccess()">Track This Complaint</button>
+      <button class="small-link" style="margin-top:14px;" onclick="resetForm(); showView('submit');">Submit another issue</button>
+    </div>
+  </section>
+
+  <!-- TRACK VIEW -->
+  <section id="view-track" class="hidden">
+    <h1 class="hero" style="font-size:1.9rem;">Track Your Complaint</h1>
+    <p class="lede">Enter your tracking ID to see how your grievance is moving through the pipeline.</p>
+    <div class="card">
+      <label class="field-label">Tracking ID <span class="req">*</span></label>
+      <input type="text" id="trackInput" placeholder="e.g. JA-4F82K9" style="text-transform:uppercase;">
+      <button class="submit-btn" onclick="lookupTrack()">Check Status</button>
+    </div>
+    <div id="trackResult"></div>
+  </section>
+
+</main>
+
+<footer>JanAwaaz AI · No names, phone numbers or emails are ever stored.</footer>
+
+<script src="sync.js"></script>
+<script>
+const CATEGORIES = {
+  Water: {color:'water', keywords:[
+    ['water',3],['leak',2],['leakage',3],['pipe',2],['pipeline',2],['sewage',3],['drain',2],['drainage',2],
+    ['tap',2],['supply',1],['tanker',3],['drinking water',3],['flood',2],['overflow',2],['borewell',3],
+    ['contaminated',2],['dirty water',3],['no water',3],['stagnant',2],['manhole',2]
+  ]},
+  Electricity: {color:'elec', keywords:[
+    ['electric',3],['electricity',3],['power cut',3],['power outage',3],['power',1],['wire',2],['wiring',2],
+    ['transformer',3],['outage',2],['voltage',2],['streetlight',3],['street light',3],['light pole',2],
+    ['current',2],['shock',3],['meter',1],['blackout',2],['short circuit',3],['cable',1],['sparking',3]
+  ]},
+  Fire: {color:'fire', keywords:[
+    ['fire',3],['smoke',2],['burn',2],['burning',2],['blaze',3],['flame',2],['explosion',3],['gas leak',3],
+    ['gas smell',2],['fire hazard',3],['fire safety',2],['extinguisher',2]
+  ]},
+  Road: {color:'road', keywords:[
+    ['road',3],['pothole',3],['potholes',3],['traffic',2],['street',1],['footpath',2],['sidewalk',2],
+    ['construction',1],['bridge',2],['signal',2],['pavement',2],['broken road',3],['damaged road',3],
+    ['divider',2],['speed breaker',2],['encroachment',2],['parking',1]
+  ]},
+  'Police/Safety': {color:'police', keywords:[
+    ['police',3],['theft',3],['harass',3],['harassment',3],['crime',2],['unsafe',2],['safety',1],
+    ['assault',3],['robbery',3],['stalk',3],['violence',2],['danger',2],['eve teasing',3],['molest',3],
+    ['drunk',1],['gang',2],['weapon',2],['fight',1],['abuse',2]
+  ]}
+};
+const DEPT_ADMIN = {
+  Water: 'Municipal Water Board Admin',
+  Electricity: 'Electricity Distribution Admin',
+  Fire: 'Fire & Emergency Services Admin',
+  Road: 'Roads & Infrastructure Admin',
+  'Police/Safety': 'Local Police Control Room',
+  General: 'Municipal General Grievance Cell'
+};
+let attachedFiles = [];
+let pendingSubmission = null;
+let lastTrackId = null;
+let activeTrackId = null;
+
+function showView(name){
+  ['submit','pipeline','success','track'].forEach(v=>{
+    document.getElementById('view-'+v).classList.toggle('hidden', v!==name);
+  });
+  document.getElementById('navSubmit').classList.toggle('active', name==='submit');
+  document.getElementById('navTrack').classList.toggle('active', name==='track');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function handleFiles(fileList){
+  Array.from(fileList).forEach(f=>{
+    attachedFiles.push(f);
+    const div = document.createElement('div');
+    div.className = 'thumb';
+    if(f.type.startsWith('image/')){
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(f);
+      div.appendChild(img);
+    } else {
+      div.textContent = '🎬 ' + f.name.slice(0,10);
+    }
+    const rm = document.createElement('div');
+    rm.className = 'rm'; rm.textContent = '✕';
+    rm.onclick = (e)=>{ e.stopPropagation(); attachedFiles = attachedFiles.filter(x=>x!==f); div.remove(); };
+    div.appendChild(rm);
+    document.getElementById('thumbs').appendChild(div);
+  });
+}
+
+function scrubPII(text){
+  return text
+    .replace(/[\w.+-]+@[\w-]+\.[a-zA-Z]{2,}/g, '[EMAIL REDACTED]')
+    .replace(/(\+?\d[\d\s-]{8,}\d)/g, '[PHONE REDACTED]')
+    .replace(/\b(mr|mrs|ms|dr)\.?\s+[A-Z][a-z]+\b/gi, '[NAME REDACTED]');
+}
+
+function classify(text){
+  const lower = text.toLowerCase();
+  let best = 'General', bestScore = 0;
+  for(const [cat, def] of Object.entries(CATEGORIES)){
+    const score = def.keywords.reduce((s,[kw,weight])=> s + (lower.includes(kw)?weight:0), 0);
+    if(score > bestScore){ bestScore = score; best = cat; }
+  }
+  return best;
+}
+
+function genId(){
+  return 'JA-' + Math.random().toString(36).slice(2,8).toUpperCase();
+}
+
+function beginPipeline(){
+  const desc = document.getElementById('descInput').value.trim();
+  if(!desc){ alert('Please describe the issue before submitting.'); return; }
+  const loc = document.getElementById('locInput').value.trim();
+
+  pendingSubmission = {
+    id: genId(),
+    rawDesc: desc,
+    loc,
+    fileNames: attachedFiles.map(f=>({name:f.name, type:f.type})),
+    submittedAt: new Date().toISOString()
+  };
+  showView('pipeline');
+  runPipelineAnimation();
+}
+
+function runPipelineAnimation(){
+  const stages = [
+    {key:'intake', title:'IntakeAgent', desc:'Scrubbing names, phone numbers & emails...'},
+    {key:'classify', title:'ClassifierAgent', desc:'Analyzing description to detect issue category...'},
+    {key:'dup', title:'DuplicateCheckAgent', desc:'Checking for similar existing complaints...'},
+    {key:'route', title:'RouterAgent', desc:'Assigning complaint to the correct department...'},
+  ];
+  const card = document.getElementById('pipelineCard');
+  card.innerHTML = stages.map((s,i)=>`
+    <div class="pipeline-stage" id="stage-${s.key}">
+      <div class="stage-dot" id="dot-${s.key}">${i+1}</div>
+      <div class="stage-text"><b>${s.title}</b><span id="desc-${s.key}">${s.desc}</span></div>
+    </div>`).join('');
+
+  const scrubbed = scrubPII(pendingSubmission.rawDesc);
+  const detectedCat = classify(pendingSubmission.rawDesc);
+  pendingSubmission.scrubbedDesc = scrubbed;
+  pendingSubmission.category = detectedCat;
+  pendingSubmission.admin = DEPT_ADMIN[detectedCat] || DEPT_ADMIN.General;
+
+  let i = 0;
+  function step(){
+    if(i>0){
+      const prev = stages[i-1];
+      document.getElementById('dot-'+prev.key).classList.replace('active','done');
+      document.getElementById('dot-'+prev.key).textContent = '✓';
+    }
+    if(i < stages.length){
+      const s = stages[i];
+      document.getElementById('dot-'+s.key).classList.add('active');
+      if(s.key==='classify') document.getElementById('desc-'+s.key).textContent = `Detected category: ${detectedCat}`;
+      if(s.key==='route') document.getElementById('desc-'+s.key).textContent = `Routed to ${pendingSubmission.admin}`;
+      i++;
+      setTimeout(step, 650);
+    } else {
+      finishSubmission();
+    }
+  }
+  step();
+}
+
+function finishSubmission(){
+  const dispatched = window.JASync ? JASync.dispatch(pendingSubmission) : null;
+  pendingSubmission.dispatchedTo = dispatched && dispatched.name;
+  pendingSubmission.dispatchedKey = dispatched && dispatched.key;
+
+  const records = JSON.parse(localStorage.getItem('janawaaz_records')||'{}');
+  records[pendingSubmission.id] = {
+    ...pendingSubmission,
+    status: 'received',
+    history: [
+      {stage:'Submitted', time: pendingSubmission.submittedAt},
+      {stage:'PII Scrubbed by IntakeAgent', time: new Date().toISOString()},
+      {stage:`Classified as ${pendingSubmission.category} by ClassifierAgent`, time: new Date().toISOString()},
+      {stage:`Routed to ${pendingSubmission.admin} by RouterAgent`, time: new Date().toISOString()},
+      {stage:`Notified ${pendingSubmission.dispatchedTo || pendingSubmission.admin} dashboard`, time: new Date().toISOString()}
+    ]
+  };
+  localStorage.setItem('janawaaz_records', JSON.stringify(records));
+
+  document.getElementById('successId').textContent = pendingSubmission.id;
+  const tagEl = document.getElementById('successTag');
+  tagEl.textContent = pendingSubmission.category;
+  tagEl.className = 'tag ' + pendingSubmission.category.replace('/','-');
+  const deptNote = document.getElementById('successDeptNote');
+  if(deptNote){
+    deptNote.textContent = pendingSubmission.dispatchedTo
+      ? 'A notification has been sent to: ' + pendingSubmission.dispatchedTo
+      : 'Routed to: ' + pendingSubmission.admin;
+  }
+  lastTrackId = pendingSubmission.id;
+  showView('success');
+}
+
+function resetForm(){
+  document.getElementById('descInput').value='';
+  document.getElementById('locInput').value='';
+  document.getElementById('thumbs').innerHTML='';
+  attachedFiles = [];
+  pendingSubmission = null;
+}
+
+function trackFromSuccess(){
+  document.getElementById('trackInput').value = lastTrackId;
+  showView('track');
+  lookupTrack();
+}
+
+function lookupTrack(){
+  const id = document.getElementById('trackInput').value.trim().toUpperCase();
+  const records = JSON.parse(localStorage.getItem('janawaaz_records')||'{}');
+  const rec = records[id];
+  const box = document.getElementById('trackResult');
+  activeTrackId = id || null;
+  if(!rec){
+    box.innerHTML = `<div class="card empty">No grievance found for <b>${id||'this ID'}</b>. Double-check your tracking ID.</div>`;
+    return;
+  }
+  const tagClass = 'tag ' + rec.category.replace('/','-');
+  const resolved = rec.status === 'resolved';
+  const dept = rec.dispatchedTo || rec.admin || 'assigned department';
+  box.innerHTML = `
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px;">
+        <div>
+          <div style="font-size:12px; color:var(--sub); margin-bottom:6px;">Assigned Category</div>
+          <span class="${tagClass}" style="font-size:14px; padding:6px 14px;">${rec.category}</span>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:12px; color:var(--sub); margin-bottom:6px;">Tracking ID</div>
+          <span style="font-family:ui-monospace,monospace; font-size:13px;">${rec.id}</span>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <span style="display:inline-block; font-size:12px; font-weight:700; padding:5px 12px; border-radius:999px; ${resolved
+          ? 'background:rgba(34,211,168,.15); color:#22d3a8; border:1px solid #1d5346;'
+          : 'background:rgba(232,163,61,.15); color:#e8a33d; border:1px solid #6b5226;'}">${resolved ? '✓ COMPLETED' : '● IN PROGRESS'}</span>
+      </div>
+      <p style="font-size:13.5px; color:var(--sub); margin:0 0 14px;">${rec.scrubbedDesc}</p>
+      <div style="font-size:13px; ${resolved?'color:#7fd08a;':'color:var(--teal);'} font-weight:600; margin-bottom:4px;">${resolved ? 'Resolved by: ' + dept : 'Currently with: ' + dept}</div>
+      <div class="track-timeline">
+        ${rec.history.map((h)=>`
+          <div class="tl-item done">
+            <div class="tl-dot">✓</div>
+            <div class="tl-body"><b>${h.stage}</b><span>${new Date(h.time).toLocaleString()}</span></div>
+          </div>`).join('')}
+        <div class="tl-item ${resolved?'done':''}">
+          <div class="tl-dot">${resolved?'✓':'•'}</div>
+          <div class="tl-body"><b>${resolved?'Resolved by '+dept:'Awaiting action from '+dept}</b><span>${resolved?'This complaint has been marked fixed by the department.':'Pending resolution by the assigned department.'}</span></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// Live sync: when a department marks the complaint fixed (its dashboard writes
+// the updated record back), refresh the tracking view in real time.
+window.addEventListener('storage', (e)=>{
+  if(e.key !== 'janawaaz_records' || !activeTrackId) return;
+  const isTrackVisible = document.getElementById('view-track') && !document.getElementById('view-track').classList.contains('hidden');
+  if(!isTrackVisible) return;
+  const records = JSON.parse(e.newValue || '{}');
+  if(records[activeTrackId]){
+    document.getElementById('trackInput').value = activeTrackId;
+    lookupTrack();
+  }
+});
+</script>
+</body>
+</html>

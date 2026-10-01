@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Municipal Water Board — Service Requests</title>
+<style>
+  :root{
+    --deep:#0d2b3e; --deep2:#123a52; --mid:#136a8a; --tide:#39a6c7; --foam:#eaf6f8; --ink:#0b1f2b;
+    box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;background:var(--foam);color:var(--ink);font-family:'Segoe UI',Helvetica,Arial,sans-serif;}
+  header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--deep);color:var(--foam);padding:16px 22px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 10px rgba(13,43,62,.25);}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .drop{width:32px;height:32px;border-radius:50% 50% 50% 0;background:var(--tide);transform:rotate(45deg);flex-shrink:0;}
+  .brand h1{margin:0;font-size:1.05rem;font-weight:600;}
+  .brand p{margin:0;font-size:.72rem;color:var(--tide);letter-spacing:.3px;}
+  .bell-wrap{position:relative;}
+  .bell{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:var(--foam);border-radius:8px;padding:8px 12px;font-size:.85rem;cursor:pointer;position:relative;}
+  .bell .dot{position:absolute;top:-6px;right:-6px;background:#e0722f;color:#fff;font-size:.65rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px;}
+  .panel{position:absolute;right:0;top:calc(100% + 8px);width:min(340px,90vw);background:#fff;color:var(--ink);border-radius:10px;box-shadow:0 14px 34px rgba(13,43,62,.28);max-height:60vh;overflow-y:auto;display:none;}
+  .panel.open{display:block;}
+  .panel h4{margin:0;padding:12px 14px;font-size:.72rem;letter-spacing:.5px;color:var(--mid);border-bottom:1px solid #e3eef2;text-transform:uppercase;}
+  .panel .item{padding:10px 14px;border-bottom:1px solid #eef5f7;font-size:.85rem;cursor:pointer;}
+  .panel .item:hover{background:#f1fafc;}
+  .panel .item b{display:block;color:var(--mid);font-size:.72rem;margin-bottom:2px;}
+  .panel .empty{padding:16px 14px;font-size:.8rem;color:#7c93a0;}
+  main{max-width:960px;margin:0 auto;padding:26px 20px 60px;}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;}
+  .stat{background:#fff;border-radius:12px;padding:14px 16px;border:1px solid #dcecf1;}
+  .stat .n{font-size:1.9rem;font-weight:700;color:var(--deep);}
+  .stat .l{font-size:.72rem;color:var(--mid);letter-spacing:.3px;text-transform:uppercase;}
+  .stat.new .n{color:#e0722f;}
+  form{background:#fff;border-radius:14px;padding:20px;margin-bottom:28px;border:1px solid #dcecf1;}
+  form h2{margin:0 0 4px;font-size:1.1rem;color:var(--deep);}
+  form p.sub{margin:0 0 16px;font-size:.82rem;color:#5b7788;}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+  input,textarea,select{width:100%;border:1px solid #cfe2e9;background:#f8fcfd;border-radius:8px;padding:10px 11px;font-size:.9rem;font-family:inherit;color:var(--ink);}
+  textarea{min-height:70px;resize:vertical;grid-column:1/-1;}
+  button.submit{background:var(--mid);color:#fff;border:none;border-radius:8px;padding:11px 20px;font-weight:600;cursor:pointer;font-size:.9rem;}
+  button.submit:hover{background:var(--deep);}
+  .list h2{font-size:1.1rem;margin:0 0 14px;color:var(--deep);}
+  .card{background:#fff;border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid #dcecf1;display:flex;gap:14px;justify-content:space-between;align-items:flex-start;}
+  .card.is-new{border-left:4px solid #e0722f;}
+  .card .meta{font-size:.7rem;color:var(--mid);letter-spacing:.3px;margin-bottom:4px;text-transform:uppercase;}
+  .card p{margin:4px 0 6px;font-size:.92rem;line-height:1.45;}
+  .card .who{font-size:.78rem;color:#5b7788;}
+  .badge{font-size:.68rem;padding:3px 10px;border-radius:20px;white-space:nowrap;height:fit-content;}
+  .badge.new{background:#fdece2;color:#c25a1f;}
+  .badge.read{background:#eaf3fb;color:var(--mid);}
+  .badge.resolved{background:#e5f6ea;color:#2f8a4a;}
+  .actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+  .actions button{background:#fff;border:1px solid #cfe2e9;color:var(--deep);font-size:.72rem;padding:5px 9px;border-radius:6px;cursor:pointer;}
+  .actions button:hover{border-color:var(--mid);color:var(--mid);}
+  .empty-state{text-align:center;padding:40px 20px;color:#7c93a0;font-size:.9rem;}
+  .ja-tag{display:inline-block;margin-left:6px;font-size:.65rem;padding:2px 7px;border-radius:20px;background:#e6fbf3;color:#0b7d5a;vertical-align:middle;font-weight:700;letter-spacing:.3px;}
+  ::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-thumb{background:#cfe2e9;border-radius:4px;}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="drop"></div>
+    <div><h1>Municipal Water Board</h1><p>SERVICE REQUEST DESK</p></div>
+  </div>
+  <div class="bell-wrap">
+    <button class="bell" id="bellBtn">Notifications<span class="dot" id="bellCount" style="display:none">0</span></button>
+    <div class="panel" id="bellPanel"><h4>New complaints</h4><div id="bellList"></div></div>
+  </div>
+</header>
+<main>
+  <div class="stats">
+    <div class="stat new"><div class="n" id="statNew">0</div><div class="l">New</div></div>
+    <div class="stat"><div class="n" id="statRead">0</div><div class="l">In progress</div></div>
+    <div class="stat"><div class="n" id="statResolved">0</div><div class="l">Resolved</div></div>
+  </div>
+
+  <form id="complaintForm">
+    <h2>Report a water issue</h2>
+    <p class="sub">Supply cuts, leaks, contamination, billing, or drainage problems — tell us what's happening.</p>
+    <div class="row">
+      <input type="text" id="cName" placeholder="Your name" required>
+      <input type="text" id="cContact" placeholder="Phone or email" required>
+    </div>
+    <div class="row">
+      <select id="cType">
+        <option>No water supply</option>
+        <option>Pipe leak / burst</option>
+        <option>Contaminated / dirty water</option>
+        <option>Low pressure</option>
+        <option>Billing dispute</option>
+        <option>Drainage / waterlogging</option>
+      </select>
+      <input type="text" id="cLocation" placeholder="Area / address" required>
+    </div>
+    <textarea id="cDetails" placeholder="Describe the issue..." required></textarea>
+    <button type="submit" class="submit">Submit complaint</button>
+  </form>
+
+  <div class="list">
+    <h2>Received complaints</h2>
+    <div id="complaintList"></div>
+  </div>
+</main>
+<script src="sync.js"></script>
+<script>
+const STORE_KEY='water_dept_complaints_v1';
+function load(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY))||seed(); }catch(e){ return seed(); } }
+function save(list){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(list)); }catch(e){} }
+function seed(){
+  const now=Date.now();
+  const s=[
+    {id:1,name:'S. Iyer',contact:'s.iyer@mail.com',type:'No water supply',location:'Ward 7, Green Park',details:'No water for three days despite tanker requests.',time:now-7200e3,status:'new'},
+    {id:2,name:'P. Naik',contact:'98xxxx4321',type:'Pipe leak / burst',location:'Station Road',details:'Main line leaking onto the street, wasting a lot of water.',time:now-172800e3,status:'read'}
+  ];
+  save(s); return s;
+}
+let complaints = load();
+function fmtTime(t){ const d=new Date(t); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'}); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+function render(){
+  const list = document.getElementById('complaintList');
+  const sorted=[...complaints].sort((a,b)=>b.time-a.time);
+  list.innerHTML = sorted.length? '' : '<div class="empty-state">No complaints yet.</div>';
+  sorted.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='card'+(c.status==='new'?' is-new':'');
+    div.innerHTML = `
+      <div style="flex:1">
+        <div class="meta">${c.type} · ${fmtTime(c.time)} · ${escapeHtml(c.location)}${c.janAwaazId?'<span class="ja-tag">via JanAwaaz</span>':''}</div>
+        <p>${escapeHtml(c.details)}</p>
+        <div class="who">Filed by ${escapeHtml(c.name)} (${escapeHtml(c.contact)})</div>
+      </div>
+      <div class="actions">
+        <span class="badge ${c.status}">${c.status==='new'?'New':c.status==='read'?'In progress':'Resolved'}</span>
+        ${c.status==='new'?'<button data-act="read" data-id="'+c.id+'">Start review</button>':''}
+        ${c.status!=='resolved'?'<button data-act="resolve" data-id="'+c.id+'">Mark resolved</button>':''}
+      </div>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('button[data-act]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id=Number(btn.dataset.id), act=btn.dataset.act;
+      const c=complaints.find(x=>x.id===id); if(!c) return;
+      c.status = act==='read' ? 'read' : 'resolved';
+      window.JASync && c.janAwaazId && JASync.syncStatus(c.janAwaazId, c.status, JASync.deptNameFor(STORE_KEY));
+      save(complaints); render(); renderBell();
+    });
+  });
+  document.getElementById('statNew').textContent = complaints.filter(c=>c.status==='new').length;
+  document.getElementById('statRead').textContent = complaints.filter(c=>c.status==='read').length;
+  document.getElementById('statResolved').textContent = complaints.filter(c=>c.status==='resolved').length;
+}
+
+function renderBell(){
+  const newOnes = complaints.filter(c=>c.status==='new').sort((a,b)=>b.time-a.time);
+  const dot=document.getElementById('bellCount');
+  if(newOnes.length){ dot.style.display='flex'; dot.textContent=newOnes.length; } else { dot.style.display='none'; }
+  const bl=document.getElementById('bellList');
+  bl.innerHTML = newOnes.length? '' : '<div class="empty">No new complaints.</div>';
+  newOnes.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='item';
+    d.innerHTML=`<b>${c.type}</b>${escapeHtml(c.location)} — ${escapeHtml(c.name)}`;
+    d.addEventListener('click', ()=>{ c.status='read'; window.JASync && c.janAwaazId && JASync.syncStatus(c.janAwaazId, c.status, JASync.deptNameFor(STORE_KEY)); save(complaints); render(); renderBell(); });
+    bl.appendChild(d);
+  });
+}
+
+document.getElementById('bellBtn').addEventListener('click', ()=>{
+  document.getElementById('bellPanel').classList.toggle('open');
+});
+document.addEventListener('click',(e)=>{
+  if(!e.target.closest('.bell-wrap')) document.getElementById('bellPanel').classList.remove('open');
+});
+
+document.getElementById('complaintForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const c = {
+    id: Date.now(),
+    name: document.getElementById('cName').value.trim(),
+    contact: document.getElementById('cContact').value.trim(),
+    type: document.getElementById('cType').value,
+    location: document.getElementById('cLocation').value.trim(),
+    details: document.getElementById('cDetails').value.trim(),
+    time: Date.now(),
+    status: 'new'
+  };
+  complaints.push(c); save(complaints);
+  e.target.reset(); render(); renderBell();
+});
+
+render(); renderBell();
+
+// Live sync: a complaint dispatched from JanAwaaz updates this board in real time.
+window.addEventListener('storage', (e)=>{
+  if(e.key!==STORE_KEY) return;
+  const prevCount = complaints.length;
+  complaints = load();
+  render(); renderBell();
+  if(complaints.length>prevCount && window.JASync){
+    const fresh = complaints.find(c=>c.source==='JanAwaaz' && c.status==='new');
+    if(fresh) JASync.notify('New complaint from JanAwaaz', fresh.type + ' — ' + fresh.location);
+  }
+});
+</script>
+</body>
+</html>
