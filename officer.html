@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Officer Console — JanAwaaz AI</title>
+<style>
+:root{
+  --bg:#0a0e17; --bg2:#0d1220; --card:#131a29; --card-border:#232c3f;
+  --teal:#22d3a8; --teal-dim:#16382f; --text:#eef1f6; --sub:#8b94a7;
+  --water:#3b9dd8; --elec:#e8b93b; --fire:#e0604a; --road:#c98a4b; --police:#9a7de0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+a{color:inherit;}
+
+header{position:sticky; top:0; z-index:20; background:rgba(10,14,23,0.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--card-border);}
+.headrow{display:flex; align-items:center; gap:10px; padding:14px 20px; max-width:900px; margin:0 auto;}
+.badge-ic{width:38px; height:38px; border-radius:10px; background:linear-gradient(160deg,#e8a33d,#b4741a); display:flex; align-items:center; justify-content:center; flex-shrink:0;}
+.brand{display:flex; flex-direction:column; line-height:1.15;}
+.brand b{font-size:16px; letter-spacing:.2px;}
+.brand span{font-size:10.5px; color:var(--sub);}
+.backlink{margin-left:auto; font-size:12.5px; color:var(--teal); text-decoration:none; border:1px solid var(--card-border); padding:8px 12px; border-radius:9px; font-weight:600; white-space:nowrap;}
+.backlink:hover{border-color:var(--teal); background:var(--teal-dim);}
+
+.wrap{max-width:900px; margin:0 auto; padding:0 20px;}
+main{padding-bottom:60px;}
+
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin:22px 0 18px;}
+.stat{background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:14px 10px; text-align:center;}
+.stat .n{font-size:22px; font-weight:800; line-height:1;}
+.stat .l{font-size:10.5px; color:var(--sub); margin-top:6px; letter-spacing:.3px;}
+.stat.new .n{color:var(--teal);}
+.stat.read .n{color:#e8a33d;}
+.stat.resolved .n{color:#7fd08a;}
+.stat.all .n{color:var(--text);}
+
+.toolbar{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px; align-items:center;}
+.toolbar select{background:var(--bg2); border:1px solid var(--card-border); color:var(--text); border-radius:10px; padding:9px 11px; font-size:13px; font-family:inherit;}
+.toolbar select:focus{outline:none; border-color:var(--teal);}
+.toolbar .grow{flex:1;}
+.toolbar input[type=text]{flex:2; min-width:150px;}
+.toolbar button{background:none; border:1px solid var(--card-border); color:var(--teal); font-size:12.5px; padding:9px 13px; border-radius:10px; cursor:pointer; font-weight:600; white-space:nowrap;}
+.toolbar button:hover{border-color:var(--teal); background:var(--teal-dim);}
+
+.queue-item{background:var(--card); border:1px solid var(--card-border); border-radius:14px; padding:16px; margin-bottom:12px;}
+.queue-item.is-new{border-left:3px solid var(--teal);}
+.queue-item.is-read{border-left:3px solid #e8a33d;}
+.queue-item.is-resolved{border-left:3px solid #7fd08a; opacity:.72;}
+.qi-top{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:9px;}
+.qi-top .type{font-size:14.5px; font-weight:700;}
+.qi-meta{font-size:12px; color:var(--sub);}
+.qi-meta b{color:var(--text); font-weight:600;}
+.qi-desc{font-size:13.5px; line-height:1.55; margin:0 0 10px;}
+.qi-note{font-size:12.5px; color:var(--sub); background:var(--bg2); border-left:2px solid var(--card-border); border-radius:0 8px 8px 0; padding:8px 11px; margin:0 0 10px;}
+.qi-note b{color:var(--teal); font-weight:600;}
+.qi-who{font-size:12px; color:var(--sub); margin-bottom:11px;}
+
+.badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;}
+.badge.new{background:var(--teal-dim); color:var(--teal);}
+.badge.read{background:#3a2f10; color:#e8a33d;}
+.badge.resolved{background:#14301c; color:#7fd08a;}
+.badge.dept{background:var(--bg2); border:1px solid var(--card-border); color:var(--sub); font-weight:600;}
+.badge.ja{background:#122f42; color:#5fb6e8;}
+.badge.moved{background:#332417; color:var(--road);}
+
+.actions{display:flex; gap:7px; flex-wrap:wrap; align-items:center;}
+.actions button{background:var(--bg2); border:1px solid var(--card-border); color:var(--text); font-size:12.5px; padding:8px 12px; border-radius:9px; cursor:pointer; font-weight:600;}
+.actions button:hover{border-color:var(--teal); color:var(--teal);}
+.actions button.primary{background:var(--teal); color:#04231b; border-color:var(--teal);}
+.actions button.primary:hover{opacity:.88; color:#04231b;}
+.actions select{background:var(--bg2); border:1px solid var(--card-border); color:var(--text); border-radius:9px; padding:8px 10px; font-size:12.5px; font-family:inherit;}
+
+.modal-back{position:fixed; inset:0; background:rgba(3,6,12,.78); display:flex; align-items:center; justify-content:center; padding:20px; z-index:50;}
+.modal{background:var(--card); border:1px solid var(--card-border); border-radius:16px; padding:22px; width:100%; max-width:440px; max-height:88vh; overflow:auto;}
+.modal h3{margin:0 0 6px; font-size:16px;}
+.modal .sub{font-size:12.5px; color:var(--sub); margin:0 0 16px; line-height:1.5;}
+.modal label{display:block; font-size:13px; font-weight:700; margin-bottom:8px;}
+.modal textarea{width:100%; background:var(--bg2); border:1px solid var(--card-border); color:var(--text); border-radius:11px; padding:12px; font-size:14px; font-family:inherit; resize:vertical; min-height:88px;}
+.modal textarea:focus{outline:none; border-color:var(--teal);}
+.modal-actions{display:flex; gap:8px; justify-content:flex-end; margin-top:18px;}
+.modal-actions button{border-radius:9px; padding:10px 16px; font-size:13px; font-weight:600; cursor:pointer; background:var(--bg2); border:1px solid var(--card-border); color:var(--text);}
+.modal-actions button.primary{background:var(--teal); color:#04231b; border-color:var(--teal);}
+
+.empty{text-align:center; color:var(--sub); font-size:14px; padding:44px 20px; background:var(--card); border:1px solid var(--card-border); border-radius:14px;}
+.hint{font-size:12px; color:var(--sub); text-align:center; margin:0 0 18px; line-height:1.5;}
+footer{text-align:center; color:var(--sub); font-size:12px; padding:10px 20px 30px;}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="headrow">
+    <div class="badge-ic">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#04231b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg>
+    </div>
+    <div class="brand"><b>Officer Console</b><span>JANAAWAI AI · UNIFIED GRIEVANCE QUEUE</span></div>
+    <a class="backlink" href="index.html">Public portal</a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="stats">
+    <div class="stat new"><div class="n" id="statNew">0</div><div class="l">NEW</div></div>
+    <div class="stat read"><div class="n" id="statRead">0</div><div class="l">IN PROGRESS</div></div>
+    <div class="stat resolved"><div class="n" id="statResolved">0</div><div class="l">RESOLVED</div></div>
+    <div class="stat all"><div class="n" id="statAll">0</div><div class="l">TOTAL</div></div>
+  </div>
+
+  <p class="hint">All grievances routed by the AI pipeline across every department. Resolving here writes the status back to the citizen's tracking record.</p>
+
+  <div class="toolbar">
+    <select id="filterStatus">
+      <option value="all">All statuses</option>
+      <option value="new">New</option>
+      <option value="read">In progress</option>
+      <option value="resolved">Resolved</option>
+    </select>
+    <select id="filterDept">
+      <option value="all">All departments</option>
+    </select>
+    <input type="text" id="searchInput" placeholder="Search ID, text, location...">
+    <button id="refreshBtn" type="button">Refresh</button>
+  </div>
+
+  <div id="queue"></div>
+
+</main>
+
+<footer>Officer Console · Actions are logged to the citizen's tracking timeline.</footer>
+
+<div class="modal-back hidden" id="modalBack">
+  <div class="modal" id="modal">
+    <h3 id="modalTitle">Add resolution note</h3>
+    <p class="sub" id="modalSub"></p>
+    <label for="noteInput" id="noteLabel">Officer note</label>
+    <textarea id="noteInput" placeholder="What was done, and what the citizen should expect next..."></textarea>
+    <div class="modal-actions">
+      <button type="button" id="modalCancel">Cancel</button>
+      <button type="button" class="primary" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script src="sync.js"></script>
+<script>
+const esc = JASync.esc;
+const DEPT_KEYS = JASync.DEPT_KEYS;
+const DEPT_NAMES = JASync.DEPT_NAMES;
+
+let all = [];
+let pending = null;
+
+function fmtTime(t){
+  const d = new Date(t);
+  return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}) + ' · ' +
+         d.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+}
+function loadAll(){ all = JASync.readAllDepts(); }
+
+function statusLabel(s){ return s === 'new' ? 'New' : s === 'read' ? 'In progress' : 'Resolved'; }
+
+function filtered(){
+  const st = document.getElementById('filterStatus').value;
+  const dp = document.getElementById('filterDept').value;
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  return all.filter(function(item){
+    const r = item.record;
+    if(st !== 'all' && r.status !== st) return false;
+    if(dp !== 'all' && item.storeKey !== dp) return false;
+    if(q){
+      // Include the public tracking ID: an officer taking a call will read
+      // out the JA-xxxx code, not the internal dept row id.
+      const hay = [r.id, r.janAwaazId, r.type, r.location, r.details, r.name, r.note, item.category, item.deptName]
+        .join(' ').toLowerCase();
+      if(hay.indexOf(q) === -1) return false;
+    }
+    return true;
+  });
+}
+
+function deptOptions(){
+  const sel = document.getElementById('filterDept');
+  const current = sel.value;
+  sel.innerHTML = '<option value="all">All departments</option>' +
+    Object.keys(DEPT_KEYS).map(function(cat){
+      const key = DEPT_KEYS[cat];
+      return '<option value="' + key + '">' + esc(DEPT_NAMES[key]) + '</option>';
+    }).join('');
+  sel.value = current;
+}
+
+function reassignOptions(currentKey){
+  return Object.keys(DEPT_KEYS)
+    .filter(function(cat){ return DEPT_KEYS[cat] !== currentKey; })
+    .map(function(cat){
+      const key = DEPT_KEYS[cat];
+      return '<option value="' + key + '">' + esc(DEPT_NAMES[key]) + '</option>';
+    }).join('');
+}
+
+function render(){
+  loadAll();
+
+  document.getElementById('statNew').textContent = all.filter(function(i){ return i.record.status === 'new'; }).length;
+  document.getElementById('statRead').textContent = all.filter(function(i){ return i.record.status === 'read'; }).length;
+  document.getElementById('statResolved').textContent = all.filter(function(i){ return i.record.status === 'resolved'; }).length;
+  document.getElementById('statAll').textContent = all.length;
+
+  const rows = filtered().sort(function(a,b){ return b.record.time - a.record.time; });
+  const box = document.getElementById('queue');
+  box.innerHTML = rows.length ? '' : '<div class="empty">Nothing matches these filters.</div>';
+
+  rows.forEach(function(item){
+    const r = item.record;
+    const div = document.createElement('div');
+    div.className = 'queue-item is-' + r.status;
+    div.innerHTML =
+      '<div class="qi-top">' +
+        '<span class="qi-top type">' + esc(r.type) + '</span>' +
+        '<span class="badge ' + r.status + '">' + statusLabel(r.status) + '</span>' +
+        '<span class="badge dept">' + esc(item.deptName) + '</span>' +
+        (r.janAwaazId ? '<span class="badge ja">via JanAwaaz</span>' : '') +
+        (r.reassignedFrom ? '<span class="badge moved">from ' + esc(r.reassignedFrom) + '</span>' : '') +
+      '</div>' +
+      '<div class="qi-meta">' +
+        (r.janAwaazId ? 'Tracking <b>' + esc(r.janAwaazId) + '</b> · ' : 'Ref <b>' + esc(r.id) + '</b> · ') +
+        fmtTime(r.time) + ' · ' + esc(r.location || 'Location not specified') +
+      '</div>' +
+      '<p class="qi-desc">' + esc(r.details) + '</p>' +
+      (r.status === 'resolved' && r.note ? '<div class="qi-note"><b>Resolution:</b> ' + esc(r.note) + '</div>' : '') +
+      (r.officer ? '<div class="qi-note"><b>Officer:</b> ' + esc(r.officer) + '</div>' : '') +
+      '<div class="qi-who">Filed by ' + esc(r.name || '—') + ' (' + esc(r.contact || '—') + ')</div>' +
+      '<div class="actions">' +
+        (r.status === 'new' ? '<button data-act="read" data-id="' + r.id + '">Start review</button>' : '') +
+        (r.status !== 'resolved' ? '<button class="primary" data-act="resolve" data-id="' + r.id + '">Mark resolved</button>' : '') +
+        (r.status !== 'resolved' ? '<button data-act="note" data-id="' + r.id + '">Add note</button>' : '') +
+        (r.janAwaazId ? '<select data-reassign="' + r.id + '"><option value="">Reassign to…</option>' + reassignOptions(item.storeKey) + '</select>' : '') +
+      '</div>';
+    box.appendChild(div);
+  });
+
+  box.querySelectorAll('button[data-act]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      const id = String(btn.dataset.id);
+      const act = btn.dataset.act;
+      const item = all.find(function(x){ return String(x.record.id) === id; });
+      if(!item) return;
+
+      if(act === 'resolve'){ openModal('resolve', item); return; }
+      if(act === 'note'){ openModal('note', item); return; }
+
+      const rec = item.record;
+      rec.status = 'read';
+      rec.officer = rec.officer || currentOfficer();
+      JASync.writeJSON(item.storeKey, all.filter(function(x){ return x.storeKey === item.storeKey; }).map(function(x){ return x.record; }));
+      if(rec.janAwaazId) JASync.syncStatus(rec.janAwaazId, 'read', item.deptName, '', rec.officer);
+      render();
+    });
+  });
+
+  box.querySelectorAll('select[data-reassign]').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      const id = String(sel.dataset.reassign);
+      const target = sel.value;
+      if(!target) return;
+      const item = all.find(function(x){ return String(x.record.id) === id; });
+      if(!item) return;
+      const moved = JASync.reassign(item.storeKey, id, target);
+      if(!moved) return;
+      if(moved.entry.janAwaazId){
+        JASync.syncStatus(moved.entry.janAwaazId, moved.entry.status, moved.to, 'Reassigned from ' + moved.from, currentOfficer());
+      }
+      JASync.notify('Complaint reassigned', moved.entry.type + ' → ' + moved.to);
+      sel.value = '';
+      render();
+    });
+  });
+}
+
+function currentOfficer(){
+  return localStorage.getItem('ja_officer_name') || 'Duty Officer';
+}
+
+function openModal(mode, item){
+  pending = { mode: mode, item: item };
+  const isResolve = mode === 'resolve';
+  document.getElementById('modalTitle').textContent = isResolve ? 'Resolve complaint' : 'Add officer note';
+  document.getElementById('modalSub').textContent =
+    item.record.type + ' · ' + item.deptName + (isResolve
+      ? ' — the citizen sees this note and a "Completed" status on their tracking page.'
+      : ' — internal note stored with the complaint.');
+  document.getElementById('noteLabel').textContent = isResolve ? 'Resolution note' : 'Officer note';
+  document.getElementById('noteInput').value = item.record.note || '';
+  document.getElementById('modalBack').classList.remove('hidden');
+  document.getElementById('noteInput').focus();
+}
+
+function closeModal(){
+  document.getElementById('modalBack').classList.add('hidden');
+  pending = null;
+}
+
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+document.getElementById('modalBack').addEventListener('click', function(e){
+  if(e.target === this) closeModal();
+});
+
+document.getElementById('modalConfirm').addEventListener('click', function(){
+  if(!pending) return;
+  const note = document.getElementById('noteInput').value.trim();
+  const item = pending.item;
+  const rec = item.record;
+  const officer = currentOfficer();
+
+  if(pending.mode === 'resolve'){
+    rec.status = 'resolved';
+    rec.note = note;
+    rec.officer = officer;
+    rec.resolvedAt = Date.now();
+    if(rec.janAwaazId) JASync.syncStatus(rec.janAwaazId, 'resolved', item.deptName, note, officer);
+    JASync.notify('Complaint resolved', rec.type + ' — ' + item.deptName);
+  } else {
+    rec.note = note;
+    rec.officer = officer;
+    if(rec.janAwaazId) JASync.syncStatus(rec.janAwaazId, rec.status, item.deptName, note, officer);
+  }
+
+  JASync.writeJSON(item.storeKey, all.filter(function(x){ return x.storeKey === item.storeKey; }).map(function(x){ return x.record; }));
+  closeModal();
+  render();
+});
+
+document.getElementById('filterStatus').addEventListener('change', render);
+document.getElementById('filterDept').addEventListener('change', render);
+document.getElementById('refreshBtn').addEventListener('click', function(){
+  localStorage.setItem('ja_officer_name', prompt('Officer name for the audit trail:', currentOfficer()) || currentOfficer());
+  render();
+});
+document.getElementById('searchInput').addEventListener('input', render);
+
+/* Another tab (a department dashboard, or the portal) changed a store. */
+window.addEventListener('storage', function(e){
+  if(Object.keys(DEPT_NAMES).indexOf(e.key) === -1) return;
+  const before = all.length;
+  render();
+  if(all.length > before){
+    const fresh = filtered().find(function(i){ return i.record.status === 'new'; });
+    if(fresh) JASync.notify('New grievance received', fresh.record.type + ' — ' + fresh.deptName);
+  }
+});
+
+deptOptions();
+render();
+</script>
+</body>
+</html>

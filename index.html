@@ -28,6 +28,8 @@ header{position:sticky; top:0; z-index:20; background:rgba(10,14,23,0.92); backd
 .navbtns{display:flex; gap:8px; margin-left:auto;}
 .navbtns button{background:none; border:1px solid var(--card-border); color:var(--teal); font-size:12.5px; padding:8px 12px; border-radius:9px; cursor:pointer; font-weight:600; white-space:nowrap;}
 .navbtns button.active{background:var(--teal-dim); border-color:var(--teal);}
+.navbtns a{background:none; border:1px solid var(--card-border); color:var(--teal); font-size:12.5px; padding:8px 12px; border-radius:9px; font-weight:600; white-space:nowrap;}
+.navbtns a:hover{background:var(--teal-dim); border-color:var(--teal);}
 
 main{padding-bottom:60px;}
 .badge{display:inline-flex; align-items:center; gap:7px; background:var(--teal-dim); color:var(--teal); border:1px solid #1d5346; border-radius:999px; padding:7px 16px; font-size:12.5px; font-weight:600; margin:26px auto 18px; }
@@ -88,6 +90,8 @@ textarea:focus, select:focus, input:focus{outline:none; border-color:var(--teal)
 .tl-item.done .tl-dot{background:var(--teal); border-color:var(--teal); color:#04231b;}
 .tl-body b{display:block; font-size:14px;}
 .tl-body span{font-size:12.5px; color:var(--sub);}
+.tl-note{margin-top:7px; font-size:12.5px; line-height:1.55; color:var(--text); background:var(--bg2); border-left:2px solid var(--teal); border-radius:0 8px 8px 0; padding:8px 11px;}
+.tl-note b{color:var(--teal); font-weight:600;}
 
 .empty{text-align:center; color:var(--sub); font-size:14px; padding:30px 10px;}
 .small-link{background:none; border:none; color:var(--teal); font-size:13.5px; cursor:pointer; text-decoration:underline; padding:0;}
@@ -106,6 +110,7 @@ footer{text-align:center; color:var(--sub); font-size:12px; padding:10px 20px 30
     <div class="navbtns">
       <button id="navSubmit" class="active" onclick="showView('submit')">Submit Issue</button>
       <button id="navTrack" onclick="showView('track')">Track Status</button>
+      <a href="officer.html" style="text-decoration:none;">Officer Console</a>
     </div>
   </div>
 </header>
@@ -226,6 +231,7 @@ const DEPT_ADMIN = {
 };
 let attachedFiles = [];
 let pendingSubmission = null;
+const escapeHtml = window.JASync ? JASync.esc : function(s){ return String(s); };
 let lastTrackId = null;
 let activeTrackId = null;
 
@@ -419,11 +425,11 @@ function lookupTrack(){
         ${rec.history.map((h)=>`
           <div class="tl-item done">
             <div class="tl-dot">✓</div>
-            <div class="tl-body"><b>${h.stage}</b><span>${new Date(h.time).toLocaleString()}</span></div>
+            <div class="tl-body"><b>${escapeHtml(h.stage)}</b><span>${new Date(h.time).toLocaleString()}</span>${(h.note||h.officer)?`<div class="tl-note">${h.officer?`<b>${escapeHtml(h.officer)}</b>: `:''}${escapeHtml(h.note||'')}</div>`:''}</div>
           </div>`).join('')}
         <div class="tl-item ${resolved?'done':''}">
           <div class="tl-dot">${resolved?'✓':'•'}</div>
-          <div class="tl-body"><b>${resolved?'Resolved by '+dept:'Awaiting action from '+dept}</b><span>${resolved?'This complaint has been marked fixed by the department.':'Pending resolution by the assigned department.'}</span></div>
+          <div class="tl-body"><b>${resolved?'Resolved by '+escapeHtml(dept):'Awaiting action from '+escapeHtml(dept)}</b><span>${resolved?'This complaint has been marked fixed by the department.':'Pending resolution by the assigned department.'}</span>${(resolved&&rec.note)?`<div class="tl-note">${escapeHtml(rec.note)}</div>`:''}</div>
         </div>
       </div>
     </div>`;

@@ -67,18 +67,58 @@ window.JASync = (function () {
   }
 
   /* department -> JanAwaaz: back-sync a status change into the public record. */
-  function syncStatus(janAwaazId, status, deptName) {
+  function syncStatus(janAwaazId, status, deptName, note, officer) {
     if (!janAwaazId || !status) return;
     var records = readJSON("janawaaz_records", {});
     var rec = records[janAwaazId];
     if (!rec) return;
     rec.status = status;
     rec.history = rec.history || [];
+    var stage = status === "resolved" ? "Resolved by " + deptName : "Update from " + deptName;
     rec.history.push({
-      stage: status === "resolved" ? "Resolved by " + deptName : "Update from " + deptName,
-      time: new Date().toISOString()
+      stage: stage,
+      time: new Date().toISOString(),
+      note: note || "",
+      officer: officer || ""
     });
     writeJSON("janawaaz_records", records);
+  }
+
+  /* Every department's store, flattened with the key attached. Used by the
+   * officer console to build one cross-department queue. */
+  function readAllDepts() {
+    var out = [];
+    Object.keys(DEPT_KEYS).forEach(function (category) {
+      var key = DEPT_KEYS[category];
+      readJSON(key, []).forEach(function (rec) {
+        out.push({
+          storeKey: key,
+          category: category,
+          deptName: DEPT_NAMES[key] || key,
+          record: rec
+        });
+      });
+    });
+    return out;
+  }
+
+  /* Move a complaint to another department's store, keeping its id and history
+   * so the JanAwaaz tracking record still lines up. Returns the new entry. */
+  function reassign(storeKey, janAwaazId, targetKey) {
+    if (!storeKey || !targetKey || storeKey === targetKey) return null;
+    var list = readJSON(storeKey, []);
+    var idx = -1;
+    for (var i = 0; i < list.length; i++) {
+      if (String(list[i].id) === String(janAwaazId)) { idx = i; break; }
+    }
+    if (idx === -1) return null;
+    var moving = list.splice(idx, 1)[0];
+    writeJSON(storeKey, list);
+    var target = readJSON(targetKey, []);
+    moving.reassignedFrom = DEPT_NAMES[storeKey] || storeKey;
+    target.push(moving);
+    writeJSON(targetKey, target);
+    return { entry: moving, from: DEPT_NAMES[storeKey] || storeKey, to: DEPT_NAMES[targetKey] || targetKey };
   }
 
   /* In-page toast + desktop notification (used by department pages on arrival). */
@@ -122,6 +162,8 @@ window.JASync = (function () {
     deptNameFor: deptNameFor,
     dispatch: dispatch,
     syncStatus: syncStatus,
+    readAllDepts: readAllDepts,
+    reassign: reassign,
     notify: notify
   };
 })();

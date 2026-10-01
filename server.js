@@ -18,7 +18,7 @@ const MIME = {
 http
   .createServer((req, res) => {
     let urlPath = decodeURIComponent(req.url.split("?")[0]);
-    if (urlPath === "/") urlPath = "/jan-awaaz.html";
+    if (urlPath === "/") urlPath = "/index.html";
     if (urlPath.indexOf("..") !== -1) {
       res.writeHead(403);
       res.end("Forbidden");

@@ -21,6 +21,8 @@
   .brand .mark{width:34px;height:34px;border-radius:50%;background:var(--ember);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;font-weight:700;color:var(--char);flex-shrink:0;}
   .brand h1{font-size:1.15rem;margin:0;font-weight:400;letter-spacing:.3px;}
   .brand p{margin:0;font-size:.75rem;color:var(--amber);font-family:Arial,sans-serif;}
+  .officer-link{color:var(--paper); text-decoration:none; border:1px solid var(--line); padding:9px 13px; border-radius:8px; font-size:1rem; font-weight:700; margin-right:4px; white-space:nowrap; font-family:Arial,sans-serif;}
+  .officer-link:hover{border-color:var(--ember); color:var(--amber);}
   .bell-wrap{position:relative;}
   .bell{background:none;border:1px solid var(--line);color:var(--paper);border-radius:8px;padding:9px 12px;font-size:1rem;cursor:pointer;position:relative;font-family:Arial,sans-serif;}
   .bell .dot{position:absolute;top:-6px;right:-6px;background:var(--ember);color:var(--paper);font-size:.65rem;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;padding:0 4px;}
@@ -70,6 +72,7 @@
     <div class="mark">🔥</div>
     <div><h1>City Fire &amp; Rescue</h1><p>DISPATCH &amp; COMPLAINT BOARD</p></div>
   </div>
+  <a class="officer-link" href="officer.html">Officer Console</a>
   <div class="bell-wrap">
     <button class="bell" id="bellBtn">Alerts<span class="dot" id="bellCount" style="display:none">0</span></button>
     <div class="panel" id="bellPanel"><h4>New reports</h4><div id="bellList"></div></div>
